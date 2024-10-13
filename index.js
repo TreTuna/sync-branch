@@ -61,13 +61,18 @@ async function run() {
         });
 
         if (reviewers.length > 0 || team_reviewers.length > 0) {
-          octokit.rest.pulls.requestReviewers({
-            owner,
-            repo,
-            pull_number: pullRequest.number,
-            reviewers,
-            team_reviewers,
-          });
+          try {
+            await octokit.rest.pulls.requestReviewers({
+              owner,
+              repo,
+              pull_number: pullRequest.number,
+              reviewers,
+              team_reviewers,
+            });
+          } catch (error) {
+            core.error(`Reviews may only be requested from collaborators. One or more of the users or teams you specified is not a collaborator of the ${repo} repository.`)
+            core.error('No reviewers will be requested. Please update the reviewier list to include only collaborators or remove non-collaborators from team.')
+          }
         }
 
         if (labels.length > 0) {
